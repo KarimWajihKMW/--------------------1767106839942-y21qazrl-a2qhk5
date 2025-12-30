@@ -1,12 +1,31 @@
 document.addEventListener('DOMContentLoaded', () => {
+    // --- Safe Storage Handler ---
+    // Handles security errors in sandboxed environments
+    const storage = (() => {
+        try {
+            const s = window.localStorage;
+            s.getItem; // Trigger access check
+            return s;
+        } catch (e) {
+            console.warn('LocalStorage access denied. Using temporary memory storage.');
+            const mem = {};
+            return {
+                getItem: (k) => mem[k] || null,
+                setItem: (k, v) => mem[k] = v,
+                removeItem: (k) => delete mem[k]
+            };
+        }
+    })();
+
     // --- Theme Management ---
     const themeToggleBtn = document.getElementById('theme-toggle');
     const sunIcon = document.getElementById('sun-icon');
     const moonIcon = document.getElementById('moon-icon');
     const htmlElement = document.documentElement;
 
-    // Check Local Storage or System Preference
-    if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+    // Check Storage or System Preference
+    const storedTheme = storage.getItem('theme');
+    if (storedTheme === 'dark' || (!storedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
         htmlElement.classList.add('dark');
         updateIcons(true);
     } else {
@@ -18,11 +37,11 @@ document.addEventListener('DOMContentLoaded', () => {
     themeToggleBtn.addEventListener('click', () => {
         if (htmlElement.classList.contains('dark')) {
             htmlElement.classList.remove('dark');
-            localStorage.theme = 'light';
+            storage.setItem('theme', 'light');
             updateIcons(false);
         } else {
             htmlElement.classList.add('dark');
-            localStorage.theme = 'dark';
+            storage.setItem('theme', 'dark');
             updateIcons(true);
         }
         // Re-render to update dynamic JS styles if necessary
@@ -141,12 +160,19 @@ document.addEventListener('DOMContentLoaded', () => {
         "عمال نظافة"
     ];
 
-    // Load jobs from localStorage or fallback to initialJobs
-    let jobs = JSON.parse(localStorage.getItem('jobs')) || initialJobs;
+    // Load jobs from storage or fallback to initialJobs
+    let jobs = [];
+    try {
+        const storedJobsData = storage.getItem('jobs');
+        jobs = storedJobsData ? JSON.parse(storedJobsData) : initialJobs;
+    } catch (e) {
+        console.error('Error parsing jobs from storage', e);
+        jobs = initialJobs;
+    }
 
-    // Save to localStorage immediately if it doesn't exist to sync with detail page
-    if (!localStorage.getItem('jobs')) {
-        localStorage.setItem('jobs', JSON.stringify(jobs));
+    // Save to storage immediately if it doesn't exist to sync with detail page
+    if (!storage.getItem('jobs')) {
+        storage.setItem('jobs', JSON.stringify(jobs));
     }
 
     let activeCategory = "الكل";
@@ -168,7 +194,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Functions ---
 
     function saveJobs() {
-        localStorage.setItem('jobs', JSON.stringify(jobs));
+        storage.setItem('jobs', JSON.stringify(jobs));
     }
 
     function renderCategories() {
@@ -320,7 +346,7 @@ document.addEventListener('DOMContentLoaded', () => {
         };
 
         jobs.unshift(newJob);
-        saveJobs(); // Save to local storage
+        saveJobs(); // Save to safe storage
         renderJobs(jobs);
         modal.classList.add('hidden');
         addJobForm.reset();
