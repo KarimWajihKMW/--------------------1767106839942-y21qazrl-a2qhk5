@@ -164,11 +164,13 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            // --- Safe Storage Handler ---
+            // --- Robust Safe Storage Handler ---
             const storage = (() => {
                 try {
                     const s = window.localStorage;
-                    s.getItem; // Trigger access check
+                    const test = '__test__';
+                    s.setItem(test, test);
+                    s.removeItem(test);
                     return s;
                 } catch (e) {
                     console.warn('LocalStorage access denied. Using temporary memory storage.');
@@ -181,6 +183,12 @@
                 }
             })();
 
+            // --- Helper for Text Content ---
+            const setText = (id, text) => {
+                const el = document.getElementById(id);
+                if (el) el.textContent = text;
+            };
+
             // --- Theme Logic ---
             const themeToggleBtn = document.getElementById('theme-toggle');
             const sunIcon = document.getElementById('sun-icon');
@@ -188,7 +196,7 @@
             const htmlElement = document.documentElement;
 
             const storedTheme = storage.getItem('theme');
-            if (storedTheme === 'dark' || (!storedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            if (storedTheme === 'dark' || (!storedTheme && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
                 htmlElement.classList.add('dark');
                 updateIcons(true);
             } else {
@@ -196,19 +204,22 @@
                 updateIcons(false);
             }
 
-            themeToggleBtn.addEventListener('click', () => {
-                if (htmlElement.classList.contains('dark')) {
-                    htmlElement.classList.remove('dark');
-                    storage.setItem('theme', 'light');
-                    updateIcons(false);
-                } else {
-                    htmlElement.classList.add('dark');
-                    storage.setItem('theme', 'dark');
-                    updateIcons(true);
-                }
-            });
+            if (themeToggleBtn) {
+                themeToggleBtn.addEventListener('click', () => {
+                    if (htmlElement.classList.contains('dark')) {
+                        htmlElement.classList.remove('dark');
+                        storage.setItem('theme', 'light');
+                        updateIcons(false);
+                    } else {
+                        htmlElement.classList.add('dark');
+                        storage.setItem('theme', 'dark');
+                        updateIcons(true);
+                    }
+                });
+            }
 
             function updateIcons(isDark) {
+                if (!sunIcon || !moonIcon) return;
                 if (isDark) {
                     sunIcon.classList.remove('hidden');
                     moonIcon.classList.add('hidden');
@@ -238,46 +249,40 @@
             const jobContent = document.getElementById('job-content');
             const errorState = document.getElementById('error-state');
 
-            loadingState.classList.add('hidden');
+            if (loadingState) loadingState.classList.add('hidden');
 
             if (!job) {
-                errorState.classList.remove('hidden');
+                if (errorState) errorState.classList.remove('hidden');
                 return;
             }
 
-            jobContent.classList.remove('hidden');
+            if (jobContent) jobContent.classList.remove('hidden');
 
-            // Populate Data
+            // Populate Data with Null Checks
             document.title = `${job.title} - مفتاح الوظائف`;
-            document.getElementById('job-title').textContent = job.title;
-            document.getElementById('company-name').textContent = job.company;
-            document.getElementById('company-initial').textContent = job.company.charAt(0);
-            document.getElementById('job-location').textContent = job.location;
-            document.getElementById('job-location-sidebar').textContent = job.location;
-            document.getElementById('job-date').textContent = job.date;
-            document.getElementById('job-salary').textContent = (job.salary && job.salary !== 'غير محدد') ? `${job.salary} ريال` : 'راتب تنافسي';
-            document.getElementById('job-type').textContent = job.type;
+            setText('job-title', job.title);
+            setText('company-name', job.company);
+            setText('company-initial', job.company ? job.company.charAt(0) : '?');
+            setText('job-location', job.location);
+            setText('job-location-sidebar', job.location);
+            setText('job-date', job.date);
+            setText('job-salary', (job.salary && job.salary !== 'غير محدد') ? `${job.salary} ريال` : 'راتب تنافسي');
+            setText('job-type', job.type);
 
             // Description Fallback
-            const defaultDesc = `نبحث عن ${job.title} متحمس للانضمام إلى فريق ${job.company}. 
-
-هذه فرصة رائعة للعمل في بيئة محفزة ومتطورة. إذا كنت تمتلك المهارات اللازمة والشغف، فنحن نرحب بك للتقديم.
-
-المهام الوظيفية:
-- أداء المهام المطلوبة بدقة وكفاءة.
-- الالتزام بتوجيهات الإدارة.
-- العمل على تحقيق أهداف الفريق.`;
-            
-            document.getElementById('job-description').textContent = job.description || defaultDesc;
+            const defaultDesc = `نبحث عن ${job.title} متحمس للانضمام إلى فريق ${job.company}. \n\nهذه فرصة رائعة للعمل في بيئة محفزة ومتطورة.`;
+            setText('job-description', job.description || defaultDesc);
 
             // Tags
             const tagsContainer = document.getElementById('job-tags');
-            if (job.tags && job.tags.length > 0) {
-                tagsContainer.innerHTML = job.tags.map(tag => 
-                    `<span class="bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 px-3 py-1 rounded-full text-sm">#${tag}</span>`
-                ).join('');
-            } else {
-                tagsContainer.innerHTML = '<span class="text-gray-400 text-sm">لا توجد وسوم</span>';
+            if (tagsContainer) {
+                if (job.tags && job.tags.length > 0) {
+                    tagsContainer.innerHTML = job.tags.map(tag => 
+                        `<span class="bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 px-3 py-1 rounded-full text-sm">#${tag}</span>`
+                    ).join('');
+                } else {
+                    tagsContainer.innerHTML = '<span class="text-gray-400 text-sm">لا توجد وسوم</span>';
+                }
             }
         });
 
