@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تفاصيل الوظيفة - مفتاح الوظائف</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ['Cairo', 'sans-serif'],
+            }
+          }
+        }
+      }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+      body {
+        font-family: 'Cairo', sans-serif;
+      }
+    </style>
+</head>
+<body class="bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-100 font-['Cairo'] transition-colors duration-300 min-h-screen flex flex-col">
+
+    <!-- Navbar -->
+    <nav class="bg-white dark:bg-gray-800 shadow-sm sticky top-0 z-40 transition-colors duration-300 border-b border-transparent dark:border-gray-700">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <a href="index.html" class="flex items-center gap-2">
+                <div class="bg-blue-600 text-white p-2 rounded-lg">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                    </svg>
+                </div>
+                <h1 class="text-xl font-bold text-gray-800 dark:text-white">مفتاح الوظائف</h1>
+            </a>
+            
+            <div class="flex items-center gap-3">
+                <button id="theme-toggle" class="p-2 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors focus:outline-none">
+                    <svg id="sun-icon" class="w-5 h-5 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                    <svg id="moon-icon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
+                </button>
+                <a href="index.html" class="bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 px-4 py-2 rounded-lg font-semibold transition-colors text-sm">
+                    عودة للرئيسية
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Content -->
+    <div class="container mx-auto px-4 py-8 flex-grow">
+        <div id="loading-state" class="text-center py-12">
+            <p class="text-xl text-gray-500">جاري تحميل التفاصيل...</p>
+        </div>
+
+        <div id="job-content" class="hidden max-w-4xl mx-auto">
+            <!-- Header Card -->
+            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-6 md:p-8 mb-6 relative overflow-hidden">
+                <div class="absolute top-0 right-0 w-2 h-full bg-blue-600"></div>
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                    <div class="flex items-start gap-4">
+                        <div class="w-16 h-16 bg-blue-50 dark:bg-gray-700 rounded-xl flex items-center justify-center text-3xl font-bold text-blue-600 dark:text-blue-400 shrink-0">
+                            <span id="company-initial"></span>
+                        </div>
+                        <div>
+                            <h1 id="job-title" class="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-2"></h1>
+                            <div class="flex flex-wrap items-center gap-3 text-sm text-gray-600 dark:text-gray-400">
+                                <span class="flex items-center gap-1">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
+                                    <span id="company-name"></span>
+                                </span>
+                                <span class="hidden md:inline">•</span>
+                                <span class="flex items-center gap-1">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                                    <span id="job-location"></span>
+                                </span>
+                                <span class="hidden md:inline">•</span>
+                                <span class="flex items-center gap-1 text-green-600 dark:text-green-400">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                    <span id="job-date"></span>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex gap-3 mt-2 md:mt-0 w-full md:w-auto">
+                         <button onclick="applyNow()" class="flex-1 md:flex-none bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl font-bold transition-all shadow-lg hover:shadow-blue-500/30">
+                            التقدم الآن
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- Right Column (Main Info) -->
+                <div class="md:col-span-2 space-y-6">
+                    <!-- Description -->
+                    <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-700">
+                        <h2 class="text-xl font-bold mb-4 flex items-center gap-2">
+                            <svg class="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7"></path></svg>
+                            وصف الوظيفة
+                        </h2>
+                        <div id="job-description" class="text-gray-600 dark:text-gray-300 leading-relaxed whitespace-pre-line">
+                            <!-- Description content -->
+                        </div>
+                    </div>
+
+                    <!-- Requirements (Static/Generated for demo) -->
+                    <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-700">
+                        <h2 class="text-xl font-bold mb-4 flex items-center gap-2">
+                            <svg class="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            المتطلبات والمهارات
+                        </h2>
+                        <ul class="list-disc list-inside space-y-2 text-gray-600 dark:text-gray-300">
+                            <li>الالتزام بمواعيد العمل.</li>
+                            <li>القدرة على العمل ضمن فريق.</li>
+                            <li>حسن المظهر والسلوك.</li>
+                            <li>الجدية في العمل وتحمل ضغوط العمل.</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Left Column (Sidebar) -->
+                <div class="space-y-6">
+                    <!-- Summary Card -->
+                    <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-700">
+                        <h3 class="font-bold text-gray-900 dark:text-white mb-4 border-b dark:border-gray-700 pb-2">ملخص الوظيفة</h3>
+                        <div class="space-y-4">
+                            <div>
+                                <span class="text-sm text-gray-500 dark:text-gray-400 block">الراتب</span>
+                                <span id="job-salary" class="font-semibold text-gray-800 dark:text-gray-200"></span>
+                            </div>
+                            <div>
+                                <span class="text-sm text-gray-500 dark:text-gray-400 block">نوع الوظيفة</span>
+                                <span id="job-type" class="inline-block bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-300 px-2 py-1 rounded text-sm font-medium mt-1"></span>
+                            </div>
+                            <div>
+                                <span class="text-sm text-gray-500 dark:text-gray-400 block">المدينة</span>
+                                <span id="job-location-sidebar" class="font-semibold text-gray-800 dark:text-gray-200"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tags -->
+                    <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-700">
+                        <h3 class="font-bold text-gray-900 dark:text-white mb-4">التصنيفات</h3>
+                        <div id="job-tags" class="flex flex-wrap gap-2">
+                            <!-- Tags injected here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="error-state" class="hidden text-center py-12">
+            <div class="text-6xl mb-4">⚠️</div>
+            <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-2">الوظيفة غير موجودة</h2>
+            <p class="text-gray-500 mb-6">يبدو أن الوظيفة التي تبحث عنها قد تم حذفها أو أن الرابط غير صحيح.</p>
+            <a href="index.html" class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition">تصفح الوظائف المتاحة</a>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- Theme Logic (Copied for consistency) ---
+            const themeToggleBtn = document.getElementById('theme-toggle');
+            const sunIcon = document.getElementById('sun-icon');
+            const moonIcon = document.getElementById('moon-icon');
+            const htmlElement = document.documentElement;
+
+            if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                htmlElement.classList.add('dark');
+                updateIcons(true);
+            } else {
+                htmlElement.classList.remove('dark');
+                updateIcons(false);
+            }
+
+            themeToggleBtn.addEventListener('click', () => {
+                if (htmlElement.classList.contains('dark')) {
+                    htmlElement.classList.remove('dark');
+                    localStorage.theme = 'light';
+                    updateIcons(false);
+                } else {
+                    htmlElement.classList.add('dark');
+                    localStorage.theme = 'dark';
+                    updateIcons(true);
+                }
+            });
+
+            function updateIcons(isDark) {
+                if (isDark) {
+                    sunIcon.classList.remove('hidden');
+                    moonIcon.classList.add('hidden');
+                } else {
+                    sunIcon.classList.add('hidden');
+                    moonIcon.classList.remove('hidden');
+                }
+            }
+
+            // --- Job Details Logic ---
+            const urlParams = new URLSearchParams(window.location.search);
+            const jobId = urlParams.get('id');
+            
+            // Fetch jobs from localStorage
+            const storedJobs = JSON.parse(localStorage.getItem('jobs')) || [];
+            
+            // Find the job (Handle both string and number IDs)
+            const job = storedJobs.find(j => j.id == jobId);
+
+            const loadingState = document.getElementById('loading-state');
+            const jobContent = document.getElementById('job-content');
+            const errorState = document.getElementById('error-state');
+
+            loadingState.classList.add('hidden');
+
+            if (!job) {
+                errorState.classList.remove('hidden');
+                return;
+            }
+
+            jobContent.classList.remove('hidden');
+
+            // Populate Data
+            document.title = `${job.title} - مفتاح الوظائف`;
+            document.getElementById('job-title').textContent = job.title;
+            document.getElementById('company-name').textContent = job.company;
+            document.getElementById('company-initial').textContent = job.company.charAt(0);
+            document.getElementById('job-location').textContent = job.location;
+            document.getElementById('job-location-sidebar').textContent = job.location;
+            document.getElementById('job-date').textContent = job.date;
+            document.getElementById('job-salary').textContent = (job.salary && job.salary !== 'غير محدد') ? `${job.salary} ريال` : 'راتب تنافسي';
+            document.getElementById('job-type').textContent = job.type;
+
+            // Description Fallback
+            const defaultDesc = `نبحث عن ${job.title} متحمس للانضمام إلى فريق ${job.company}. 
+
+هذه فرصة رائعة للعمل في بيئة محفزة ومتطورة. إذا كنت تمتلك المهارات اللازمة والشغف، فنحن نرحب بك للتقديم.
+
+المهام الوظيفية:
+- أداء المهام المطلوبة بدقة وكفاءة.
+- الالتزام بتوجيهات الإدارة.
+- العمل على تحقيق أهداف الفريق.`;
+            
+            document.getElementById('job-description').textContent = job.description || defaultDesc;
+
+            // Tags
+            const tagsContainer = document.getElementById('job-tags');
+            if (job.tags && job.tags.length > 0) {
+                tagsContainer.innerHTML = job.tags.map(tag => 
+                    `<span class="bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 px-3 py-1 rounded-full text-sm">#${tag}</span>`
+                ).join('');
+            } else {
+                tagsContainer.innerHTML = '<span class="text-gray-400 text-sm">لا توجد وسوم</span>';
+            }
+        });
+
+        function applyNow() {
+            alert('تم استلام طلب التقديم بنجاح! سيتم التواصل معك قريباً.');
+        }
+    </script>
+</body>
+</html>
