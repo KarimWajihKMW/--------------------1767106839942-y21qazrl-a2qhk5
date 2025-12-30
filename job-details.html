@@ -164,13 +164,31 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            // --- Theme Logic (Copied for consistency) ---
+            // --- Safe Storage Handler ---
+            const storage = (() => {
+                try {
+                    const s = window.localStorage;
+                    s.getItem; // Trigger access check
+                    return s;
+                } catch (e) {
+                    console.warn('LocalStorage access denied. Using temporary memory storage.');
+                    const mem = {};
+                    return {
+                        getItem: (k) => mem[k] || null,
+                        setItem: (k, v) => mem[k] = v,
+                        removeItem: (k) => delete mem[k]
+                    };
+                }
+            })();
+
+            // --- Theme Logic ---
             const themeToggleBtn = document.getElementById('theme-toggle');
             const sunIcon = document.getElementById('sun-icon');
             const moonIcon = document.getElementById('moon-icon');
             const htmlElement = document.documentElement;
 
-            if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            const storedTheme = storage.getItem('theme');
+            if (storedTheme === 'dark' || (!storedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
                 htmlElement.classList.add('dark');
                 updateIcons(true);
             } else {
@@ -181,11 +199,11 @@
             themeToggleBtn.addEventListener('click', () => {
                 if (htmlElement.classList.contains('dark')) {
                     htmlElement.classList.remove('dark');
-                    localStorage.theme = 'light';
+                    storage.setItem('theme', 'light');
                     updateIcons(false);
                 } else {
                     htmlElement.classList.add('dark');
-                    localStorage.theme = 'dark';
+                    storage.setItem('theme', 'dark');
                     updateIcons(true);
                 }
             });
@@ -204,8 +222,14 @@
             const urlParams = new URLSearchParams(window.location.search);
             const jobId = urlParams.get('id');
             
-            // Fetch jobs from localStorage
-            const storedJobs = JSON.parse(localStorage.getItem('jobs')) || [];
+            // Fetch jobs from safe storage
+            let storedJobs = [];
+            try {
+                const jobsData = storage.getItem('jobs');
+                storedJobs = jobsData ? JSON.parse(jobsData) : [];
+            } catch(e) {
+                console.error("Error loading jobs", e);
+            }
             
             // Find the job (Handle both string and number IDs)
             const job = storedJobs.find(j => j.id == jobId);
