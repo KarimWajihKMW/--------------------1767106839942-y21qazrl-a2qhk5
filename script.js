@@ -25,7 +25,7 @@ document.addEventListener('DOMContentLoaded', () => {
             localStorage.theme = 'dark';
             updateIcons(true);
         }
-        // Re-render to update dynamic JS styles if necessary (e.g. category buttons)
+        // Re-render to update dynamic JS styles if necessary
         renderCategories();
         renderJobs(jobs);
     });
@@ -50,10 +50,8 @@ document.addEventListener('DOMContentLoaded', () => {
             type: "دوام كامل",
             salary: "4500 - 5500",
             date: "منذ ساعتين",
-            tags: [
-                "مطاعم بشكل عام",
-                "طبخ"
-            ]
+            tags: ["مطاعم بشكل عام", "طبخ"],
+            description: "مطلوب شيف متخصص في المشويات والمقبلات الشامية للعمل في مطعم راقي بالرياض. خبرة لا تقل عن 3 سنوات."
         },
         {
             id: 2,
@@ -63,10 +61,8 @@ document.addEventListener('DOMContentLoaded', () => {
             type: "عقد",
             salary: "2000 - 2500",
             date: "منذ 4 ساعات",
-            tags: [
-                "عمال نظافة",
-                "خدمات"
-            ]
+            tags: ["عمال نظافة", "خدمات"],
+            description: "مطلوب عمال نظافة للعمل بنظام العقود في مجمعات تجارية. توفر الشركة السكن والمواصلات."
         },
         {
             id: 3,
@@ -76,10 +72,8 @@ document.addEventListener('DOMContentLoaded', () => {
             type: "دوام كامل",
             salary: "5000 + عمولة",
             date: "منذ يوم",
-            tags: [
-                "خدمه التجميل",
-                "نساء"
-            ]
+            tags: ["خدمه التجميل", "نساء"],
+            description: "صالون تجميل في الدمام يبحث عن أخصائية شعر ومكياج بخبرة عالية. بيئة عمل نسائية بالكامل."
         },
         {
             id: 4,
@@ -89,10 +83,8 @@ document.addEventListener('DOMContentLoaded', () => {
             type: "دوام جزئي",
             salary: "3000",
             date: "منذ يومين",
-            tags: [
-                "استراحات",
-                "حراسة"
-            ]
+            tags: ["استراحات", "حراسة"],
+            description: "مطلوب حارس لمتابعة استراحة خاصة، يشمل العمل ري الأشجار والتنظيف ومتابعة الحجوزات."
         },
         {
             id: 5,
@@ -102,10 +94,8 @@ document.addEventListener('DOMContentLoaded', () => {
             type: "يومية",
             salary: "150 ريال/يوم",
             date: "منذ 3 أيام",
-            tags: [
-                "عمال بشكل عام",
-                "نقل"
-            ]
+            tags: ["عمال بشكل عام", "نقل"],
+            description: "عمل يومي للتحميل والتنزيل مع مؤسسة نقل عفش. الدفع يومي بنهاية الدوام."
         },
         {
             id: 6,
@@ -115,10 +105,8 @@ document.addEventListener('DOMContentLoaded', () => {
             type: "دوام كامل",
             salary: "4000",
             date: "منذ أسبوع",
-            tags: [
-                "مطاعم بشكل عام",
-                "كاشير"
-            ]
+            tags: ["مطاعم بشكل عام", "كاشير"],
+            description: "مطلوب كاشير سعودي للعمل في سلسلة مطاعم. يشترط اللباقة وحسن المظهر."
         },
         {
             id: 7,
@@ -128,10 +116,8 @@ document.addEventListener('DOMContentLoaded', () => {
             type: "عمل حر",
             salary: "حسب المشروع",
             date: "منذ أسبوع",
-            tags: [
-                "تسويق",
-                "إدارة"
-            ]
+            tags: ["تسويق", "إدارة"],
+            description: "نبحث عن مسوق إلكتروني محترف لإدارة حملات إعلانية على منصات التواصل الاجتماعي."
         }
     ];
 
@@ -147,7 +133,6 @@ document.addEventListener('DOMContentLoaded', () => {
         "هندسة"
     ];
 
-    // Categories that need the "Posts" (المنشورات) badge/button added inside them
     const postsCategories = [
         "مطاعم بشكل عام", 
         "عمال بشكل عام", 
@@ -156,7 +141,14 @@ document.addEventListener('DOMContentLoaded', () => {
         "عمال نظافة"
     ];
 
-    let jobs = [...initialJobs];
+    // Load jobs from localStorage or fallback to initialJobs
+    let jobs = JSON.parse(localStorage.getItem('jobs')) || initialJobs;
+
+    // Save to localStorage immediately if it doesn't exist to sync with detail page
+    if (!localStorage.getItem('jobs')) {
+        localStorage.setItem('jobs', JSON.stringify(jobs));
+    }
+
     let activeCategory = "الكل";
 
     // --- DOM Elements ---
@@ -175,25 +167,26 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Functions ---
 
+    function saveJobs() {
+        localStorage.setItem('jobs', JSON.stringify(jobs));
+    }
+
     function renderCategories() {
         categoriesContainer.innerHTML = categories.map(cat => {
             const isActive = activeCategory === cat;
             const hasPostsBtn = postsCategories.includes(cat);
             
-            // Dynamic styling for the main button with Dark Mode support
             const baseClasses = "px-4 py-2 rounded-full text-sm font-medium transition-all whitespace-nowrap flex items-center gap-2 border";
             const activeClasses = isActive 
                 ? 'bg-blue-600 text-white border-blue-600 shadow-md' 
                 : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700';
 
-            // Badge styling for "المنشورات"
             const badgeClasses = isActive
                 ? 'bg-white/20 text-white'
                 : 'bg-blue-100 text-blue-600 dark:bg-blue-900 dark:text-blue-300';
 
             let buttonContent = `<span>${cat}</span>`;
             
-            // Add the requested "Posts" button/badge inside the category button
             if (hasPostsBtn) {
                 buttonContent += `
                     <span class="${badgeClasses} text-[10px] px-2 py-0.5 rounded-full transition-colors font-bold">
@@ -212,7 +205,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }).join('');
     }
 
-    // Make filterByCategory global so HTML onclick can see it
     window.filterByCategory = (category) => {
         activeCategory = category;
         renderCategories();
@@ -233,8 +225,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
         jobsToRender.forEach(job => {
             const card = document.createElement('div');
-            // Updated classes for Dark Mode
-            card.className = 'bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6 hover:shadow-md transition-shadow group relative overflow-hidden';
+            // Added cursor-pointer and click event to navigate to details
+            card.className = 'bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6 hover:shadow-md transition-shadow group relative overflow-hidden cursor-pointer';
+            
+            // Navigate to details page on click
+            card.onclick = () => {
+                window.location.href = `job-details.html?id=${job.id}`;
+            };
+
             card.innerHTML = `
                 <div class="absolute top-0 right-0 w-2 h-full bg-blue-600 opacity-0 group-hover:opacity-100 transition-opacity"></div>
                 <div class="flex justify-between items-start mb-4">
@@ -243,11 +241,11 @@ document.addEventListener('DOMContentLoaded', () => {
                             ${job.company.charAt(0)}
                         </div>
                         <div>
-                            <h3 class="font-bold text-lg text-gray-900 dark:text-white leading-tight">${job.title}</h3>
+                            <h3 class="font-bold text-lg text-gray-900 dark:text-white leading-tight group-hover:text-blue-600 transition-colors">${job.title}</h3>
                             <p class="text-sm text-gray-500 dark:text-gray-400">${job.company}</p>
                         </div>
                     </div>
-                    ${job.date.includes('ساعة') || job.date.includes('ساعتين') ? 
+                    ${job.date.includes('ساعة') || job.date.includes('ساعتين') || job.date === 'الآن' ? 
                         '<span class="bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400 text-xs px-2 py-1 rounded-full font-medium">جديد</span>' : ''}
                 </div>
 
@@ -268,8 +266,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 <div class="flex justify-between items-center mt-4 border-t dark:border-gray-700 pt-4">
                     <span class="text-xs text-gray-400 dark:text-gray-500">${job.date}</span>
-                    <button onclick="alert('تم تقديم طلبك لوظيفة: ${job.title} بنجاح!')" class="text-blue-600 dark:text-blue-400 font-semibold text-sm hover:underline">
-                        التقدم للوظيفة &larr;
+                    <!-- stopPropagation prevents the card click event -->
+                    <button onclick="event.stopPropagation(); alert('تم تقديم طلبك لوظيفة: ${job.title} بنجاح!')" class="text-blue-600 dark:text-blue-400 font-semibold text-sm hover:underline">
+                        التقدم السريع
                     </button>
                 </div>
             `;
@@ -284,7 +283,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const filtered = jobs.filter(job => {
             const matchesSearch = job.title.toLowerCase().includes(query) || job.company.toLowerCase().includes(query);
             const matchesLocation = location === "" || job.location === location;
-            // Enhanced category matching: Check both tags and exact category match in title or tag
             const matchesCategory = activeCategory === "الكل" || 
                                     job.tags.some(tag => tag === activeCategory) || 
                                     job.tags.some(tag => tag.includes(activeCategory));
@@ -299,7 +297,6 @@ document.addEventListener('DOMContentLoaded', () => {
     searchInput.addEventListener('input', filterJobs);
     locationFilter.addEventListener('change', filterJobs);
 
-    // Modal Logic
     openModalBtn.addEventListener('click', () => modal.classList.remove('hidden'));
     closeModalBtn.addEventListener('click', () => modal.classList.add('hidden'));
     modal.addEventListener('click', (e) => {
@@ -318,15 +315,16 @@ document.addEventListener('DOMContentLoaded', () => {
             type: formData.get('type'),
             salary: formData.get('salary') || 'غير محدد',
             date: 'الآن',
-            tags: ['جديد', 'عام'] // Default tags for user created jobs
+            tags: ['جديد', 'عام'],
+            description: formData.get('description') || 'لا يوجد وصف إضافي.'
         };
 
         jobs.unshift(newJob);
+        saveJobs(); // Save to local storage
         renderJobs(jobs);
         modal.classList.add('hidden');
         addJobForm.reset();
         
-        // Optional: Show success feedback
         alert('تم نشر الوظيفة بنجاح!');
     });
 
