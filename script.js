@@ -73,7 +73,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     ];
 
-    // Added the specific categories requested by the user at the beginning
     const categories = [
         "الكل", 
         "مطاعم بشكل عام", 
@@ -84,6 +83,15 @@ document.addEventListener('DOMContentLoaded', () => {
         "تسويق",
         "إدارة",
         "هندسة"
+    ];
+
+    // Categories that need the "Posts" (المنشورات) badge/button added inside them
+    const postsCategories = [
+        "مطاعم بشكل عام", 
+        "عمال بشكل عام", 
+        "استراحات", 
+        "خدمه التجميل", 
+        "عمال نظافة"
     ];
 
     let jobs = [...initialJobs];
@@ -106,16 +114,40 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Functions ---
 
     function renderCategories() {
-        categoriesContainer.innerHTML = categories.map(cat => `
+        categoriesContainer.innerHTML = categories.map(cat => {
+            const isActive = activeCategory === cat;
+            const hasPostsBtn = postsCategories.includes(cat);
+            
+            // Dynamic styling for the main button
+            const baseClasses = "px-4 py-2 rounded-full text-sm font-medium transition-all whitespace-nowrap flex items-center gap-2 border";
+            const activeClasses = isActive 
+                ? 'bg-blue-600 text-white border-blue-600 shadow-md' 
+                : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50';
+
+            // Badge styling for "المنشورات"
+            const badgeClasses = isActive
+                ? 'bg-white/20 text-white'
+                : 'bg-blue-100 text-blue-600';
+
+            let buttonContent = `<span>${cat}</span>`;
+            
+            // Add the requested "Posts" button/badge inside the category button
+            if (hasPostsBtn) {
+                buttonContent += `
+                    <span class="${badgeClasses} text-[10px] px-2 py-0.5 rounded-full transition-colors font-bold">
+                        المنشورات
+                    </span>
+                `;
+            }
+
+            return `
             <button 
                 onclick="filterByCategory('${cat}')"
-                class="px-4 py-2 rounded-full text-sm font-medium transition-all whitespace-nowrap 
-                ${activeCategory === cat 
-                    ? 'bg-blue-600 text-white shadow-md' 
-                    : 'bg-white text-gray-600 border border-gray-200 hover:bg-gray-50'}">
-                ${cat}
+                class="${baseClasses} ${activeClasses}">
+                ${buttonContent}
             </button>
-        `).join('');
+            `;
+        }).join('');
     }
 
     // Make filterByCategory global so HTML onclick can see it
