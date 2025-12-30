@@ -1,12 +1,14 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // --- Safe Storage Copy --- 
-    // (Reused to ensure consistency with main script)
+    // --- Robust Safe Storage Handler ---
     const storage = (() => {
         try {
             const s = window.localStorage;
-            s.getItem; 
+            const test = '__test__';
+            s.setItem(test, test);
+            s.removeItem(test);
             return s;
         } catch (e) {
+            console.warn('LocalStorage access denied. Using temporary memory storage.');
             const mem = {};
             return {
                 getItem: (k) => mem[k] || null,
@@ -16,6 +18,12 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     })();
 
+    // --- Safe Element Setter ---
+    const setSafeText = (id, text) => {
+        const el = document.getElementById(id);
+        if (el) el.textContent = text;
+    };
+
     // --- Theme Logic ---
     const themeToggleBtn = document.getElementById('theme-toggle');
     const sunIcon = document.getElementById('sun-icon');
@@ -23,7 +31,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const htmlElement = document.documentElement;
 
     const storedTheme = storage.getItem('theme');
-    if (storedTheme === 'dark' || (!storedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+    if (storedTheme === 'dark' || (!storedTheme && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
         htmlElement.classList.add('dark');
         updateIcons(true);
     } else {
@@ -31,19 +39,22 @@ document.addEventListener('DOMContentLoaded', () => {
         updateIcons(false);
     }
 
-    themeToggleBtn.addEventListener('click', () => {
-        if (htmlElement.classList.contains('dark')) {
-            htmlElement.classList.remove('dark');
-            storage.setItem('theme', 'light');
-            updateIcons(false);
-        } else {
-            htmlElement.classList.add('dark');
-            storage.setItem('theme', 'dark');
-            updateIcons(true);
-        }
-    });
+    if (themeToggleBtn) {
+        themeToggleBtn.addEventListener('click', () => {
+            if (htmlElement.classList.contains('dark')) {
+                htmlElement.classList.remove('dark');
+                storage.setItem('theme', 'light');
+                updateIcons(false);
+            } else {
+                htmlElement.classList.add('dark');
+                storage.setItem('theme', 'dark');
+                updateIcons(true);
+            }
+        });
+    }
 
     function updateIcons(isDark) {
+        if (!sunIcon || !moonIcon) return;
         if (isDark) {
             sunIcon.classList.remove('hidden');
             moonIcon.classList.add('hidden');
@@ -54,8 +65,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- Dashboard Logic ---
-    
-    // Dummy initial data fallback (same as index to avoid empty dashboard if opened directly)
     const initialJobs = [
         {
             id: 1,
@@ -67,17 +76,6 @@ document.addEventListener('DOMContentLoaded', () => {
             date: "منذ ساعتين",
             tags: ["مطاعم بشكل عام", "طبخ"],
             description: "مطلوب شيف متخصص في المشويات والمقبلات الشامية للعمل في مطعم راقي بالرياض."
-        },
-        {
-            id: 2,
-            title: "عامل نظافة وتطهير",
-            company: "شركة كلين سيرفس",
-            location: "جدة",
-            type: "عقد",
-            salary: "2000 - 2500",
-            date: "منذ 4 ساعات",
-            tags: ["عمال نظافة", "خدمات"],
-            description: "مطلوب عمال نظافة للعمل بنظام العقود."
         }
     ];
 
@@ -85,31 +83,32 @@ document.addEventListener('DOMContentLoaded', () => {
     try {
         const storedJobsData = storage.getItem('jobs');
         jobs = storedJobsData ? JSON.parse(storedJobsData) : initialJobs;
-        // If we fell back to initial, save it
+        // If we fell back to initial, save it safely
         if (!storedJobsData) storage.setItem('jobs', JSON.stringify(jobs));
     } catch (e) {
         jobs = initialJobs;
     }
 
     function renderStats() {
-        document.getElementById('total-jobs').textContent = jobs.length;
-        // Mock data for views and applications
-        document.getElementById('total-views').textContent = jobs.length * 153;
-        document.getElementById('total-applications').textContent = Math.floor(jobs.length * 12.5);
+        setSafeText('total-jobs', jobs.length);
+        setSafeText('total-views', jobs.length * 153);
+        setSafeText('total-applications', Math.floor(jobs.length * 12.5));
     }
 
     function renderTable() {
         const tbody = document.getElementById('jobs-table-body');
         const emptyState = document.getElementById('empty-state');
         
+        if (!tbody) return;
+
         tbody.innerHTML = '';
 
         if (jobs.length === 0) {
-            emptyState.classList.remove('hidden');
+            if (emptyState) emptyState.classList.remove('hidden');
             return;
         }
 
-        emptyState.classList.add('hidden');
+        if (emptyState) emptyState.classList.add('hidden');
 
         jobs.forEach(job => {
             const tr = document.createElement('tr');
