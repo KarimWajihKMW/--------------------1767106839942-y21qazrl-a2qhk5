@@ -1,13 +1,16 @@
 document.addEventListener('DOMContentLoaded', () => {
     // --- Safe Storage Handler ---
-    // Handles security errors in sandboxed environments
+    // Completely wrapped to prevent SecurityError in sandboxed iframes
     const storage = (() => {
         try {
+            // Try to touch localStorage to see if it throws
             const s = window.localStorage;
-            s.getItem; // Trigger access check
+            const testKey = '__test_storage__';
+            s.setItem(testKey, testKey);
+            s.removeItem(testKey);
             return s;
         } catch (e) {
-            console.warn('LocalStorage access denied. Using temporary memory storage.');
+            console.warn('LocalStorage access denied or restricted. Using temporary memory storage.');
             const mem = {};
             return {
                 getItem: (k) => mem[k] || null,
@@ -17,6 +20,12 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     })();
 
+    // --- Helper for Safe DOM Manipulation ---
+    const setSafeText = (id, text) => {
+        const el = document.getElementById(id);
+        if (el) el.innerText = text;
+    };
+
     // --- Theme Management ---
     const themeToggleBtn = document.getElementById('theme-toggle');
     const sunIcon = document.getElementById('sun-icon');
@@ -25,7 +34,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Check Storage or System Preference
     const storedTheme = storage.getItem('theme');
-    if (storedTheme === 'dark' || (!storedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+    if (storedTheme === 'dark' || (!storedTheme && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
         htmlElement.classList.add('dark');
         updateIcons(true);
     } else {
@@ -34,22 +43,24 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Toggle Theme
-    themeToggleBtn.addEventListener('click', () => {
-        if (htmlElement.classList.contains('dark')) {
-            htmlElement.classList.remove('dark');
-            storage.setItem('theme', 'light');
-            updateIcons(false);
-        } else {
-            htmlElement.classList.add('dark');
-            storage.setItem('theme', 'dark');
-            updateIcons(true);
-        }
-        // Re-render to update dynamic JS styles if necessary
-        renderCategories();
-        renderJobs(jobs);
-    });
+    if (themeToggleBtn) {
+        themeToggleBtn.addEventListener('click', () => {
+            if (htmlElement.classList.contains('dark')) {
+                htmlElement.classList.remove('dark');
+                storage.setItem('theme', 'light');
+                updateIcons(false);
+            } else {
+                htmlElement.classList.add('dark');
+                storage.setItem('theme', 'dark');
+                updateIcons(true);
+            }
+            renderCategories();
+            renderJobs(jobs);
+        });
+    }
 
     function updateIcons(isDark) {
+        if (!sunIcon || !moonIcon) return;
         if (isDark) {
             sunIcon.classList.remove('hidden');
             moonIcon.classList.add('hidden');
@@ -170,14 +181,15 @@ document.addEventListener('DOMContentLoaded', () => {
         jobs = initialJobs;
     }
 
-    // Save to storage immediately if it doesn't exist to sync with detail page
+    // Save to storage immediately if it doesn't exist
     if (!storage.getItem('jobs')) {
         storage.setItem('jobs', JSON.stringify(jobs));
     }
 
     let activeCategory = "الكل";
 
-    // --- DOM Elements ---
+    // --- DOM Elements --- 
+    // Use null checks for all elements
     const jobsGrid = document.getElementById('jobs-grid');
     const jobCount = document.getElementById('job-count');
     const searchInput = document.getElementById('search-input');
@@ -185,7 +197,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const noResults = document.getElementById('no-results');
     const categoriesContainer = document.getElementById('categories-container');
     
-    // Modal Elements
     const modal = document.getElementById('job-modal');
     const openModalBtn = document.getElementById('open-modal-btn');
     const closeModalBtn = document.getElementById('close-modal-btn');
@@ -198,6 +209,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function renderCategories() {
+        if (!categoriesContainer) return;
+        
         categoriesContainer.innerHTML = categories.map(cat => {
             const isActive = activeCategory === cat;
             const hasPostsBtn = postsCategories.includes(cat);
@@ -238,23 +251,22 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     function renderJobs(jobsToRender) {
+        if (!jobsGrid) return;
         jobsGrid.innerHTML = '';
         
         if (jobsToRender.length === 0) {
-            noResults.classList.remove('hidden');
-            jobCount.innerText = '0 وظيفة';
+            if (noResults) noResults.classList.remove('hidden');
+            if (jobCount) jobCount.innerText = '0 وظيفة';
             return;
         }
         
-        noResults.classList.add('hidden');
-        jobCount.innerText = `${jobsToRender.length} وظيفة`;
+        if (noResults) noResults.classList.add('hidden');
+        if (jobCount) jobCount.innerText = `${jobsToRender.length} وظيفة`;
 
         jobsToRender.forEach(job => {
             const card = document.createElement('div');
-            // Added cursor-pointer and click event to navigate to details
             card.className = 'bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6 hover:shadow-md transition-shadow group relative overflow-hidden cursor-pointer';
             
-            // Navigate to details page on click
             card.onclick = () => {
                 window.location.href = `job-details.html?id=${job.id}`;
             };
@@ -264,7 +276,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 <div class="flex justify-between items-start mb-4">
                     <div class="flex items-center gap-3">
                         <div class="w-12 h-12 bg-gray-100 dark:bg-gray-700 rounded-lg flex items-center justify-center text-xl font-bold text-gray-500 dark:text-gray-400">
-                            ${job.company.charAt(0)}
+                            ${job.company ? job.company.charAt(0) : '?'}
                         </div>
                         <div>
                             <h3 class="font-bold text-lg text-gray-900 dark:text-white leading-tight group-hover:text-blue-600 transition-colors">${job.title}</h3>
@@ -292,7 +304,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 <div class="flex justify-between items-center mt-4 border-t dark:border-gray-700 pt-4">
                     <span class="text-xs text-gray-400 dark:text-gray-500">${job.date}</span>
-                    <!-- stopPropagation prevents the card click event -->
                     <button onclick="event.stopPropagation(); alert('تم تقديم طلبك لوظيفة: ${job.title} بنجاح!')" class="text-blue-600 dark:text-blue-400 font-semibold text-sm hover:underline">
                         التقدم السريع
                     </button>
@@ -303,8 +314,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function filterJobs() {
+        if (!searchInput) return;
         const query = searchInput.value.toLowerCase();
-        const location = locationFilter.value;
+        const location = locationFilter ? locationFilter.value : "";
         
         const filtered = jobs.filter(job => {
             const matchesSearch = job.title.toLowerCase().includes(query) || job.company.toLowerCase().includes(query);
@@ -320,39 +332,41 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- Event Listeners ---
-    searchInput.addEventListener('input', filterJobs);
-    locationFilter.addEventListener('change', filterJobs);
+    if (searchInput) searchInput.addEventListener('input', filterJobs);
+    if (locationFilter) locationFilter.addEventListener('change', filterJobs);
 
-    openModalBtn.addEventListener('click', () => modal.classList.remove('hidden'));
-    closeModalBtn.addEventListener('click', () => modal.classList.add('hidden'));
-    modal.addEventListener('click', (e) => {
+    if (openModalBtn && modal) openModalBtn.addEventListener('click', () => modal.classList.remove('hidden'));
+    if (closeModalBtn && modal) closeModalBtn.addEventListener('click', () => modal.classList.add('hidden'));
+    if (modal) modal.addEventListener('click', (e) => {
         if (e.target === modal) modal.classList.add('hidden');
     });
 
-    addJobForm.addEventListener('submit', (e) => {
-        e.preventDefault();
-        
-        const formData = new FormData(addJobForm);
-        const newJob = {
-            id: Date.now(),
-            title: formData.get('title'),
-            company: formData.get('company'),
-            location: formData.get('location'),
-            type: formData.get('type'),
-            salary: formData.get('salary') || 'غير محدد',
-            date: 'الآن',
-            tags: ['جديد', 'عام'],
-            description: formData.get('description') || 'لا يوجد وصف إضافي.'
-        };
+    if (addJobForm) {
+        addJobForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            const formData = new FormData(addJobForm);
+            const newJob = {
+                id: Date.now(),
+                title: formData.get('title'),
+                company: formData.get('company'),
+                location: formData.get('location'),
+                type: formData.get('type'),
+                salary: formData.get('salary') || 'غير محدد',
+                date: 'الآن',
+                tags: ['جديد', 'عام'],
+                description: formData.get('description') || 'لا يوجد وصف إضافي.'
+            };
 
-        jobs.unshift(newJob);
-        saveJobs(); // Save to safe storage
-        renderJobs(jobs);
-        modal.classList.add('hidden');
-        addJobForm.reset();
-        
-        alert('تم نشر الوظيفة بنجاح!');
-    });
+            jobs.unshift(newJob);
+            saveJobs();
+            renderJobs(jobs);
+            if (modal) modal.classList.add('hidden');
+            addJobForm.reset();
+            
+            alert('تم نشر الوظيفة بنجاح!');
+        });
+    }
 
     // --- Initialization ---
     renderCategories();
