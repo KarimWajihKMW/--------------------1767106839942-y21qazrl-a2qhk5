@@ -197,10 +197,17 @@ document.addEventListener('DOMContentLoaded', () => {
     const noResults = document.getElementById('no-results');
     const categoriesContainer = document.getElementById('categories-container');
     
+    // Job Modal
     const modal = document.getElementById('job-modal');
     const openModalBtn = document.getElementById('open-modal-btn');
     const closeModalBtn = document.getElementById('close-modal-btn');
     const addJobForm = document.getElementById('add-job-form');
+
+    // Auth Modal
+    const authModal = document.getElementById('auth-modal');
+    const openAuthBtn = document.getElementById('open-auth-btn');
+    const closeAuthBtn = document.getElementById('close-auth-btn');
+    const authForm = document.getElementById('auth-form');
 
     // --- Functions ---
 
@@ -335,11 +342,28 @@ document.addEventListener('DOMContentLoaded', () => {
     if (searchInput) searchInput.addEventListener('input', filterJobs);
     if (locationFilter) locationFilter.addEventListener('change', filterJobs);
 
+    // Job Modal Listeners
     if (openModalBtn && modal) openModalBtn.addEventListener('click', () => modal.classList.remove('hidden'));
     if (closeModalBtn && modal) closeModalBtn.addEventListener('click', () => modal.classList.add('hidden'));
     if (modal) modal.addEventListener('click', (e) => {
         if (e.target === modal) modal.classList.add('hidden');
     });
+
+    // Auth Modal Listeners (New)
+    if (openAuthBtn && authModal) openAuthBtn.addEventListener('click', () => authModal.classList.remove('hidden'));
+    if (closeAuthBtn && authModal) closeAuthBtn.addEventListener('click', () => authModal.classList.add('hidden'));
+    if (authModal) authModal.addEventListener('click', (e) => {
+        if (e.target === authModal) authModal.classList.add('hidden');
+    });
+
+    if (authForm) {
+        authForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            alert('تم إنشاء الحساب بنجاح! يمكنك الآن استخدام الموقع.');
+            authModal.classList.add('hidden');
+            authForm.reset();
+        });
+    }
 
     if (addJobForm) {
         addJobForm.addEventListener('submit', (e) => {
