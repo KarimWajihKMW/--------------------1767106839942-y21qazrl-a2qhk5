@@ -200,6 +200,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // Job Modal
     const modal = document.getElementById('job-modal');
     const openModalBtn = document.getElementById('open-modal-btn');
+    // NEW: Navbar Post Job Button
+    const navPostJobBtn = document.getElementById('nav-post-job-btn');
+    
     const closeModalBtn = document.getElementById('close-modal-btn');
     const addJobForm = document.getElementById('add-job-form');
 
@@ -344,6 +347,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Job Modal Listeners
     if (openModalBtn && modal) openModalBtn.addEventListener('click', () => modal.classList.remove('hidden'));
+    // Listener for the new Navbar button
+    if (navPostJobBtn && modal) navPostJobBtn.addEventListener('click', () => modal.classList.remove('hidden'));
+    
     if (closeModalBtn && modal) closeModalBtn.addEventListener('click', () => modal.classList.add('hidden'));
     if (modal) modal.addEventListener('click', (e) => {
         if (e.target === modal) modal.classList.add('hidden');
