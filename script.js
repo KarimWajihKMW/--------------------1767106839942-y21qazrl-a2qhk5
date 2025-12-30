@@ -3,57 +3,88 @@ document.addEventListener('DOMContentLoaded', () => {
     const initialJobs = [
         {
             id: 1,
-            title: "مسوق رقمي",
-            company: "شركة التقنية الحديثة",
+            title: "شيف مشويات ومقبلات",
+            company: "مطعم المذاق الأصيل",
             location: "الرياض",
             type: "دوام كامل",
-            salary: "6000 - 8000",
+            salary: "4500 - 5500",
             date: "منذ ساعتين",
-            tags: ["تسويق", "SEO"]
+            tags: ["مطاعم بشكل عام", "طبخ"]
         },
         {
             id: 2,
-            title: "مصمم واجهات مستخدم UI/UX",
-            company: "استديو الإبداع",
-            location: "عن بعد",
-            type: "عمل حر",
-            salary: "حسب المشروع",
-            date: "منذ 5 ساعات",
-            tags: ["تصميم", "Figma"]
+            title: "عامل نظافة وتطهير",
+            company: "شركة كلين سيرفس",
+            location: "جدة",
+            type: "عقد",
+            salary: "2000 - 2500",
+            date: "منذ 4 ساعات",
+            tags: ["عمال نظافة", "خدمات"]
         },
         {
             id: 3,
-            title: "مدير مبيعات",
-            company: "مجموعة العقارية",
-            location: "جدة",
+            title: "أخصائية شعر ومكياج",
+            company: "مركز لمسات للجمال",
+            location: "الدمام",
             type: "دوام كامل",
-            salary: "12000+",
+            salary: "5000 + عمولة",
             date: "منذ يوم",
-            tags: ["مبيعات", "إدارة"]
+            tags: ["خدمه التجميل", "نساء"]
         },
         {
             id: 4,
-            title: "مطور تطبيقات Flutter",
-            company: "حلول برمجية",
-            location: "الدمام",
-            type: "عقد",
-            salary: "9000",
+            title: "حارس ومسؤول استراحة",
+            company: "شاليهات النسيم",
+            location: "الرياض",
+            type: "دوام جزئي",
+            salary: "3000",
             date: "منذ يومين",
-            tags: ["برمجة", "موبايل"]
+            tags: ["استراحات", "حراسة"]
         },
         {
             id: 5,
-            title: "كاشير وموظف استقبال",
-            company: "مطاعم السعادة",
+            title: "عامل مساعد (تحميل وتنزيل)",
+            company: "مؤسسة النقل السريع",
             location: "مكة",
-            type: "دوام جزئي",
-            salary: "3500",
+            type: "يومية",
+            salary: "150 ريال/يوم",
             date: "منذ 3 أيام",
-            tags: ["مطاعم", "خدمة عملاء"]
+            tags: ["عمال بشكل عام", "نقل"]
+        },
+        {
+            id: 6,
+            title: "كاشير مطعم",
+            company: "برجر هاوس",
+            location: "جدة",
+            type: "دوام كامل",
+            salary: "4000",
+            date: "منذ أسبوع",
+            tags: ["مطاعم بشكل عام", "كاشير"]
+        },
+        {
+            id: 7,
+            title: "مسوق إلكتروني",
+            company: "شركة التقنية",
+            location: "عن بعد",
+            type: "عمل حر",
+            salary: "حسب المشروع",
+            date: "منذ أسبوع",
+            tags: ["تسويق", "إدارة"]
         }
     ];
 
-    const categories = ["الكل", "تسويق", "برمجة", "تصميم", "مبيعات", "إدارة", "هندسة"];
+    // Added the specific categories requested by the user at the beginning
+    const categories = [
+        "الكل", 
+        "مطاعم بشكل عام", 
+        "عمال بشكل عام", 
+        "استراحات", 
+        "خدمه التجميل", 
+        "عمال نظافة",
+        "تسويق",
+        "إدارة",
+        "هندسة"
+    ];
 
     let jobs = [...initialJobs];
     let activeCategory = "الكل";
@@ -158,9 +189,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const filtered = jobs.filter(job => {
             const matchesSearch = job.title.toLowerCase().includes(query) || job.company.toLowerCase().includes(query);
             const matchesLocation = location === "" || job.location === location;
+            // Enhanced category matching: Check both tags and exact category match in title or tag
             const matchesCategory = activeCategory === "الكل" || 
-                                    job.tags.some(tag => tag.includes(activeCategory)) || 
-                                    job.title.includes(activeCategory);
+                                    job.tags.some(tag => tag === activeCategory) || 
+                                    job.tags.some(tag => tag.includes(activeCategory));
 
             return matchesSearch && matchesLocation && matchesCategory;
         });
@@ -191,7 +223,7 @@ document.addEventListener('DOMContentLoaded', () => {
             type: formData.get('type'),
             salary: formData.get('salary') || 'غير محدد',
             date: 'الآن',
-            tags: ['جديد']
+            tags: ['جديد', 'عام'] // Default tags for user created jobs
         };
 
         jobs.unshift(newJob);
